@@ -1,0 +1,66 @@
+Epic Enchantments Spec
+
+
+
+Goal: Extra abilities for swords and other tools, so that players can create and use swords with special capabilities (or "epic enchantments").
+
+Purpose: To add more variety to the weapons without requiring client-side mods.
+
+Implementation:
+	- NBT data for items with epic enchantments. Items that have an epic enchantment will have an NBT tag like the following:
+		{
+			LeftBindings: [
+				{
+					Commands: [command],
+					Activation: [all|entity|block],
+					AsPlayer: (true|false),
+					KillingStroke: (true|false)
+				},
+				...
+			],
+			RightBindings: [
+				{
+					Commands: [command],
+					Activation: [all|entity|block|air],
+					Radius: [float],
+					AsPlayer: (true|false)
+				},
+				...
+			]
+		}
+		
+		where LeftBindings and RightBindings are arrays of epic enchantments that will be run when the player left clicks or right clicks, respectively.
+		
+		
+		There are several different circumstances in which a command may be executed:
+			1. The player clicks an entity within reach distance
+			2. The player clicks a block within reach distance
+			3. The player clicks open air, but is looking at a block within radius
+			4. The player clicks open air and is not looking at a block within radius
+			
+		For cases 1 and 2 (but not 3 and 4), left clicking is supported. Bindings can be added to a weapon that will run a command
+		when either case 1 or case 2 is true. This is because it is not possible to detect when the player left clicks open air
+		without client-side mods.
+		
+		The Activation.LeftClick enum for a binding can be one of:
+			"all": 		The command is executed for cases 1 and 2
+			"entity": 	The command is executed for case 1
+			"block": 	The command is executed for cases 2 and 3
+		
+		A binding with 'KillingStroke: true' will only fire when the player's attack kills an entity. This means that 'KillingStroke' is ignored for
+		"block" activations.
+		
+		
+		For all cases, right clicking is supported. Bindings can be added to a weapon that will run a command when the player right clicks on anything.
+		
+		The Activation.RightClick enum for a binding can be one of:
+			"all":		The command is executed for cases 1, 2, and 3
+			"entity":	The command is executed for case 1
+			"block":	The command is executed for cases 2 and 3
+			"air":		The command is executed for cases 3 and 4
+			
+		The 'AsPlayer' boolean dictates who runs the command. If this is true, the player will run the command; if not, the target (if it exists) will run the command.
+		
+
+	- /bind command to apply a binding to the player's held item, with a syntax like
+		/bind <(left|right)> <activation> <asPlayer> [radius] <command>
